@@ -148,7 +148,7 @@ default_border normal
 # feh - Wallpaper Setter
 exec_always --no-startup-id sh ~/.fehbg
 
-# picom - Compositing Manager for Shadows and Opacity
+# compton - Compositing Manager for Shadows and Opacity
 exec_always --no-startup-id picom --config ~/.config/picom/picom.conf
 
 # VM Clipboard Fix
@@ -162,14 +162,3 @@ bindsym $mod+Ctrl+Shift+Left resize grow width 10 px or 10 ppt
 
 # screenshot
 bindsym $mod+P exec flameshot gui
-
-
-# Volume controls (ALSA)
-bindsym XF86AudioRaiseVolume exec --no-startup-id amixer set Master 5%+
-bindsym XF86AudioLowerVolume exec --no-startup-id amixer set Master 5%-
-bindsym XF86AudioMute exec --no-startup-id amixer set Master toggle
-
-# Keyboard-only fallback (no conflict)
-bindsym $mod+Ctrl+Up exec --no-startup-id amixer set Master 5%+
-bindsym $mod+Ctrl+Down exec --no-startup-id amixer set Master 5%-
-bindsym $mod+Ctrl+m exec --no-startup-id amixer set Master toggle
