@@ -7,7 +7,7 @@ echo "🚀 Starting i3 setup installation..."
 sudo apt update && sudo apt upgrade -y
 
 # 2️⃣ Install essential packages
-sudo apt install -y i3 alacritty rofi picom compton feh amixer xorg xbacklight fonts-powerline python3-pip
+sudo apt install -y i3 alacritty rofi picom feh amixer xorg xbacklight fonts-powerline python3-pip
 
 # 3️⃣ Backup existing configs
 for d in .config .wallpapers; do
@@ -33,24 +33,21 @@ killall picom compton || true
 picom --config "$HOME/.config/picom/picom.conf" &
 
 # 8️⃣ Reload i3
-i3-msg reload
-i3-msg restart
-
-echo "✅ i3 setup installation complete!"
+i3-msg reload || true
+i3-msg restart || true
 
 # 9️⃣ Configure Custom Pywal Scripts (Toggle On/Off)
 echo "🎨 Setting up Pywal toggle scripts..."
 mkdir -p "$HOME/bin"
 
-# Create the ENABLE script
+# Create the ENABLE script (Removed rm sequences line)
 cat << 'EON' > "$HOME/bin/enable_pywal.sh"
 #!/bin/bash
 read -p "Enter wallpaper path: " img_path
 if [ -f "$img_path" ]; then
     wal -i "$img_path" -n
-    rm -f "$HOME/.cache/wal/sequences"
     pywalfox update
-    echo "✔ Pywal Enabled (Wallpaper & Firefox). Terminal colors blocked."
+    echo "✔ Pywal Enabled (Wallpaper, Firefox, and Terminal Colors)."
 else
     echo "✘ Error: File not found!"
 fi
@@ -60,7 +57,7 @@ EON
 cat << 'EOD' > "$HOME/bin/disable_pywal.sh"
 #!/bin/bash
 rm -rf "$HOME/.cache/wal/"*
-# Set back to the default wallpaper from your .wallpapers folder
+# Set back to default wallpaper
 feh --bg-fill "$HOME/.wallpapers/wallpaper.jpg"
 pywalfox update 2>/dev/null
 reset
@@ -70,22 +67,26 @@ EOD
 # Make them executable
 chmod +x "$HOME/bin/enable_pywal.sh" "$HOME/bin/disable_pywal.sh"
 
-# Add aliases to .zshrc if they aren't there
+# Add aliases and PERSISTENCE to .zshrc
 if [ -f "$HOME/.zshrc" ]; then
+    # Add Aliases
     if ! grep -q "alias py-on" "$HOME/.zshrc"; then
         echo -e "\n# Pywal Toggle Aliases\nalias py-on='~/bin/enable_pywal.sh'\nalias py-off='~/bin/disable_pywal.sh'" >> "$HOME/.zshrc"
     fi
-fi
+    
+    # ADDED THIS: Color persistence logic for new terminal windows
+    if ! grep -q "cache/wal/sequences" "$HOME/.zshrc"; then
+        echo -e "\n# Import colors from pywal if they exist\nif [ -f ~/.cache/wal/sequences ]; then\n    (cat ~/.cache/wal/sequences &)\nfi" >> "$HOME/.zshrc"
+    fi
 
-# Ensure ~/bin is in PATH for the current user session
-if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$HOME/.zshrc"; then
-    echo 'export PATH="$HOME/bin:$PATH"' >> "$HOME/.zshrc"
+    # Ensure ~/bin is in PATH
+    if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$HOME/.zshrc"; then
+        echo 'export PATH="$HOME/bin:$PATH"' >> "$HOME/.zshrc"
+    fi
 fi
 
 # 🔟 Install Python Tools for Pywal
-# This is the part you just asked about!
 echo "🐍 Installing Pywal and Pywalfox..."
-sudo apt install -y python3-pip
 python3 -m pip install --user pywal16 pywalfox --break-system-packages
 
 echo "✅ i3 setup and Pywal toggle installation complete!"
