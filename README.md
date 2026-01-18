@@ -14,6 +14,6 @@ If your Kali ever breaks, fear not — clone this repo, run the installer, and b
 ## How to Install
 
 ```bash
-git clone <your-repo-link>
+git clone https://github.com/Takezo49/i3-setup/
 cd i3-setup
 ./install.sh
