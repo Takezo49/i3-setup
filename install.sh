@@ -95,5 +95,8 @@ fi
 echo "🐍 Installing Pywal and Pywalfox..."
 python3 -m pip install --user pywal16 pywalfox --break-system-packages
 
-echo "✅ i3 setup and Pywal toggle installation complete!"
-echo "👉 Restart your terminal or run 'source ~/.zshrc' to use 'py-on' and 'py-off'."
+echo "🔗 Linking Pywalfox to Firefox..."
+# This is the exact command that worked!
+python3 -m pywalfox install
+
+echo "Installation completed!!!!!!!!!"
