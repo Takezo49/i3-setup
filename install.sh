@@ -40,19 +40,25 @@ i3-msg restart || true
 echo "🎨 Setting up Pywal toggle scripts..."
 mkdir -p "$HOME/bin"
 
-# Create the ENABLE script (Removed rm sequences line)
+# Create the ENABLE script
 cat << 'EON' > "$HOME/bin/enable_pywal.sh"
 #!/bin/bash
 read -p "Enter wallpaper path: " img_path
 if [ -f "$img_path" ]; then
+    # 1. Force the wallpaper change immediately
+    feh --bg-fill "$img_path"
+    
+    # 2. Generate colors but skip setting wallpaper again (-n)
     wal -i "$img_path" -n
+    
+    # 3. Update Firefox
     pywalfox update
-    echo "✔ Pywal Enabled (Wallpaper, Firefox, and Terminal Colors)."
+    
+    echo "✔ Pywal Enabled: Wallpaper, Firefox, and Terminal updated!"
 else
     echo "✘ Error: File not found!"
 fi
 EON
-
 # Create the DISABLE script
 cat << 'EOD' > "$HOME/bin/disable_pywal.sh"
 #!/bin/bash
