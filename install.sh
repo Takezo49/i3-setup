@@ -20,6 +20,7 @@ done
 # 4️⃣ Copy your configs
 cp -r .config "$HOME/"
 cp -r .wallpapers "$HOME/"
+cp .zshrc "$HOME/"
 
 # 5️⃣ Set wallpapers
 if [ -f "$HOME/.wallpapers/wallpaper.jpg" ]; then
@@ -98,5 +99,12 @@ python3 -m pip install --user pywal16 pywalfox --break-system-packages
 echo "🔗 Linking Pywalfox to Firefox..."
 # This is the exact command that worked!
 python3 -m pywalfox install
+
+# 1️⃣1️⃣ Configure ZSH
+echo "🐚 Ensuring Oh My Zsh is installed..."
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+# Note: Since we copied .zshrc in step 4, we don't need to 'cat' it here!
 
 echo "Installation completed!!!!!!!!!"
