@@ -1,110 +1,86 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
-echo "🚀 Starting i3 setup installation..."
+echo "🚀 Starting Full i3-Gaps & Pywal Setup..."
 
-# 1️⃣ Update system
+# 1️⃣ Update & Install System Dependencies
 sudo apt update && sudo apt upgrade -y
+sudo apt install -y wget curl git thunar arandr flameshot arc-theme feh i3blocks \
+    i3status i3 lxappearance python3-pip rofi unclutter cargo compton \
+    papirus-icon-theme imagemagick unzip zsh
 
-# 2️⃣ Install essential packages
-sudo apt install -y i3 alacritty rofi picom feh amixer xorg xbacklight fonts-powerline python3-pip
+# Install Build Dependencies for i3-gaps (if needed)
+sudo apt install -y libxcb-shape0-dev libxcb-keysyms1-dev libpango1.0-dev \
+    libxcb-util0-dev xcb libxcb1-dev libxcb-icccm4-dev libyajl-dev libev-dev \
+    libxcb-xkb-dev libxcb-cursor-dev libxkbcommon-dev libxcb-xinerama0-dev \
+    libxkbcommon-x11-dev libstartup-notification0-dev libxcb-randr0-dev \
+    libxcb-xrm0 libxcb-xrm-dev autoconf meson libxcb-render-util0-dev \
+    libxcb-shape0-dev libxcb-xfixes0-dev
 
-# 3️⃣ Backup existing configs
-for d in .config .wallpapers; do
-    if [ -d "$HOME/$d" ]; then
-        echo "Backing up existing $d to $d-backup"
-        mv "$HOME/$d" "$HOME/$d-backup-$(date +%s)"
-    fi
-done
+# 2️⃣ Install Nerd Fonts
+echo "📂 Installing Fonts..."
+mkdir -p ~/.local/share/fonts/
+wget -nc https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/Iosevka.zip
+wget -nc https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/RobotoMono.zip
+unzip -o Iosevka.zip -d ~/.local/share/fonts/
+unzip -o RobotoMono.zip -d ~/.local/share/fonts/
+fc-cache -fv
 
-# 4️⃣ Copy your configs
-cp -r .config "$HOME/"
-cp -r .wallpapers "$HOME/"
-cp .zshrc "$HOME/"
+# 3️⃣ Install Alacritty (Debian package)
+echo "🖥️ Installing Alacritty..."
+wget -nc https://github.com/barnumbirr/alacritty-debian/releases/download/v0.10.0-rc4-1/alacritty_0.10.0-rc4-1_amd64_bullseye.deb
+sudo dpkg -i alacritty_0.10.0-rc4-1_amd64_bullseye.deb || sudo apt install -f -y
 
-# 5️⃣ Set wallpapers
-if [ -f "$HOME/.wallpapers/wallpaper.jpg" ]; then
-    feh --bg-scale "$HOME/.wallpapers/wallpaper.jpg"
+# 4️⃣ Install Oh My Zsh (Unattended)
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "🐚 Installing Oh My Zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 
-# 6️⃣ Kill any existing compositor
-killall picom compton || true
+# 5️⃣ Install Pywal & Pywalfox
+echo "🐍 Installing Pywal and Pywalfox..."
+python3 -m pip install --user pywal16 pywalfox --break-system-packages
+python3 -m pywalfox install
 
-# 7️⃣ Start picom
-picom --config "$HOME/.config/picom/picom.conf" &
+# 6️⃣ Copy Configs & Setup Scripts
+echo "⚙️ Syncing Config Files..."
+mkdir -p ~/.config/i3 ~/.config/picom ~/.config/rofi ~/.config/alacritty ~/bin
 
-# 8️⃣ Reload i3
-i3-msg reload || true
-i3-msg restart || true
+# Copy from your repo to $HOME
+cp -r .config/* ~/.config/
+cp .zshrc ~/.zshrc
+cp -r .wallpapers ~/.wallpapers
 
-# 9️⃣ Configure Custom Pywal Scripts (Toggle On/Off)
-echo "🎨 Setting up Pywal toggle scripts..."
-mkdir -p "$HOME/bin"
-
-# Create the ENABLE script
+# 7️⃣ Create Pywal Toggle Scripts (Fixed Logic)
 cat << 'EON' > "$HOME/bin/enable_pywal.sh"
 #!/bin/bash
 read -p "Enter wallpaper path: " img_path
 if [ -f "$img_path" ]; then
-    # 1. Force the wallpaper change immediately
     feh --bg-fill "$img_path"
-    
-    # 2. Generate colors but skip setting wallpaper again (-n)
     wal -i "$img_path" -n
-    
-    # 3. Update Firefox
-    pywalfox update
-    
-    echo "✔ Pywal Enabled: Wallpaper, Firefox, and Terminal updated!"
+    python3 -m pywalfox update
+    echo "✔ Pywal Enabled!"
 else
     echo "✘ Error: File not found!"
 fi
 EON
-# Create the DISABLE script
+
 cat << 'EOD' > "$HOME/bin/disable_pywal.sh"
 #!/bin/bash
 rm -rf "$HOME/.cache/wal/"*
-# Set back to default wallpaper
 feh --bg-fill "$HOME/.wallpapers/wallpaper.jpg"
-pywalfox update 2>/dev/null
+python3 -m pywalfox update 2>/dev/null
 reset
-echo "✔ Pywal Disabled. Back to default."
+echo "✔ Pywal Disabled."
 EOD
 
-# Make them executable
 chmod +x "$HOME/bin/enable_pywal.sh" "$HOME/bin/disable_pywal.sh"
+chmod +x ~/.config/i3/clipboard_fix.sh
 
-# Add aliases and PERSISTENCE to .zshrc
-if [ -f "$HOME/.zshrc" ]; then
-    # Add Aliases
-    if ! grep -q "alias py-on" "$HOME/.zshrc"; then
-        echo -e "\n# Pywal Toggle Aliases\nalias py-on='~/bin/enable_pywal.sh'\nalias py-off='~/bin/disable_pywal.sh'" >> "$HOME/.zshrc"
-    fi
-    
-    # ADDED THIS: Color persistence logic for new terminal windows
-    if ! grep -q "cache/wal/sequences" "$HOME/.zshrc"; then
-        echo -e "\n# Import colors from pywal if they exist\nif [ -f ~/.cache/wal/sequences ]; then\n    (cat ~/.cache/wal/sequences &)\nfi" >> "$HOME/.zshrc"
-    fi
+# 8️⃣ Final Touches
+i3-msg reload || true
 
-    # Ensure ~/bin is in PATH
-    if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$HOME/.zshrc"; then
-        echo 'export PATH="$HOME/bin:$PATH"' >> "$HOME/.zshrc"
-    fi
-fi
-
-# 🔟 Install Python Tools for Pywal
-echo "🐍 Installing Pywal and Pywalfox..."
-python3 -m pip install --user pywal16 pywalfox --break-system-packages
-
-echo "🔗 Linking Pywalfox to Firefox..."
-# This is the exact command that worked!
-python3 -m pywalfox install
-
-# 1️⃣1️⃣ Configure ZSH
-echo "🐚 Ensuring Oh My Zsh is installed..."
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-fi
-# Note: Since we copied .zshrc in step 4, we don't need to 'cat' it here!
-
-echo "Installation completed!!!!!!!!!"
+echo "✅ DONE! REBOOT and then:"
+echo "1. Select i3 at login."
+echo "2. Run lxappearance to set Arc-Dark icons/theme."
+echo "3. Run 'py-on' to set your first dynamic theme!"
