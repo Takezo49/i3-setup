@@ -6,7 +6,7 @@ echo "🚀 Starting Full i3-Gaps & Pywal Setup..."
 # 1️⃣ Update & Install System Dependencies
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y wget curl git thunar arandr flameshot arc-theme feh i3blocks \
-    i3status i3 lxappearance python3-pip rofi unclutter cargo compton \
+    i3status i3 lxappearance python3-pip rofi unclutter cargo picom \
     papirus-icon-theme imagemagick unzip zsh
 
 # Install Build Dependencies for i3-gaps (if needed)

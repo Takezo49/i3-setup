@@ -149,7 +149,7 @@ default_border normal
 exec_always --no-startup-id sh ~/.fehbg
 
 # compton - Compositing Manager for Shadows and Opacity
-exec_always --no-startup-id picom --config ~/.config/picom/picom.conf
+exec_always --no-startup-id picom --config ~/.config/picom/picom.conf -b
 
 # VM Clipboard Fix
 exec_always --no-startup-id ~/.config/i3/clipboard_fix.sh
