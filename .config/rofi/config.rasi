@@ -1,4 +1,11 @@
+@import "~/.cache/wal/colors-rofi-dark"
 
 //@theme "/usr/share/rofi/themes/purple.rasi"
 
-@theme "/usr/local/share/rofi/themes/DarkBlue.rasi"
+//@theme "/usr/local/share/rofi/themes/DarkBlue.rasi"
+
+//@theme "/usr/local/share/rofi/themes/material.rasi"
+
+//@theme "/usr/share/rofi/themes/solarized.rasi"
+
+@theme "/usr/share/rofi/themes/Monokai.rasi"
