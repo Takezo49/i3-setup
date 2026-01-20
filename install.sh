@@ -52,11 +52,25 @@ python3 -m pywalfox install
 # 6️⃣ Sync Configs & Fix Permissions
 echo "⚙️ Syncing Config Files..."
 mkdir -p ~/.config/i3 ~/.config/picom ~/.config/rofi ~/.config/alacritty ~/bin
+
+# Copy everything from repo to .config
 cp -r .config/* ~/.config/
 cp .zshrc ~/.zshrc
 cp -r .wallpapers ~/.wallpapers
 
-# Reclaim ownership to prevent "unwritable" errors
+# --- NEW: Symbolic Link Setup ---
+# 1. Create the default color file from your current alacritty settings
+# (Assumes your repo's alacritty.yml has your favorite colors)
+cp ~/.config/alacritty/alacritty.yml ~/.config/alacritty/colors-default.yml
+
+# 2. Create the symlink that Alacritty will actually 'import'
+ln -sf ~/.config/alacritty/colors-default.yml ~/.config/alacritty/colors-wal.yml
+
+# 3. Inject the import line into the MAIN config so it stays persistent
+# We put it at the very top of the file
+sed -i '1iimport:\n  - ~/.config/alacritty/colors-wal.yml' ~/.config/alacritty/alacritty.yml
+# --------------------------------
+
 sudo chown -R $USER:$USER ~/.config ~/.zshrc ~/bin
 
 # 7️⃣ Create Pywal Toggle Scripts
@@ -66,8 +80,12 @@ read -p "Enter wallpaper path: " img_path
 if [ -f "$img_path" ]; then
     feh --bg-fill "$img_path"
     wal -i "$img_path" -n
+    
+    # Switch link to Pywal Cache
+    ln -sf ~/.cache/wal/colors-alacritty.yml ~/.config/alacritty/colors-wal.yml
+    
     python3 -m pywalfox update
-    echo "✔ Pywal Enabled!"
+    echo "✔ Pywal Enabled! (Colors linked to Cache)"
 else
     echo "✘ Error: File not found!"
 fi
@@ -75,15 +93,20 @@ EON
 
 cat << 'EOD' > "$HOME/bin/disable_pywal.sh"
 #!/bin/bash
+# Switch link back to Default Colors
+ln -sf ~/.config/alacritty/colors-default.yml ~/.config/alacritty/colors-wal.yml
+
 rm -rf "$HOME/.cache/wal/"*
 feh --bg-fill "$HOME/.wallpapers/wallpaper.jpg"
 python3 -m pywalfox update 2>/dev/null
+
+# Force Alacritty to see the link change
+touch ~/.config/alacritty/alacritty.yml
 reset
-echo "✔ Pywal Disabled."
+echo "✔ Pywal Disabled. (Colors linked to Default)"
 EOD
 
 chmod +x "$HOME/bin/enable_pywal.sh" "$HOME/bin/disable_pywal.sh"
-[ -f ~/.config/i3/clipboard_fix.sh ] && chmod +x ~/.config/i3/clipboard_fix.sh
 
 # 8️⃣ System Permissions (Thunar/Mounting Fix)
 echo "🛡️ Setting up system permissions..."
@@ -127,6 +150,19 @@ EOF
 fi
 
 # 🔟 Final Touches
+# 🔟 Final Touches
+echo "🖼️ Setting default wallpaper..."
+# Ensure the directory exists and has the file
+if [ -f "$HOME/.wallpapers/23.jpg" ]; then
+    feh --bg-fill "$HOME/.wallpapers/23.jpg"
+    # Create the .fehbg file so it persists on next login
+    echo "feh --bg-fill '$HOME/.wallpapers/23.jpg'" > "$HOME/.fehbg"
+    chmod +x "$HOME/.fehbg"
+else
+    echo "⚠️ Warning: .wallpapers/wallpaper.jpg not found. Skipping wallpaper set."
+fi
+
+echo "🔄 Reloading i3..."
 i3-msg reload || true
 
 echo "✅ DONE! REBOOT and then:"
