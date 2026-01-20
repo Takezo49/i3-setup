@@ -70,7 +70,7 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -110,3 +110,13 @@ alias cl='clear'
 if [ -f ~/.cache/wal/sequences ]; then
     (cat ~/.cache/wal/sequences &)
 fi
+
+# --- Added by Install Script ---
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt share_history
+setopt append_history
+# -------------------------------
+# Import colorscheme from 'wal' asynchronously
+(cat ~/.cache/wal/sequences &)
