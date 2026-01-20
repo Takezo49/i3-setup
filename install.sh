@@ -31,11 +31,14 @@ echo "🖥️ Installing Alacritty..."
 wget -nc https://github.com/barnumbirr/alacritty-debian/releases/download/v0.10.0-rc4-1/alacritty_0.10.0-rc4-1_amd64_bullseye.deb
 sudo dpkg -i alacritty_0.10.0-rc4-1_amd64_bullseye.deb || sudo apt install -f -y
 
-# 4️⃣ Install Oh My Zsh (Unattended)
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "🐚 Installing Oh My Zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-fi
+# 4.1️⃣ Install Zsh Plugins (Suggestions & Highlighting)
+echo "🔌 Installing Zsh Plugins..."
+ZSH_CUSTOM_PLUGINS="$HOME/.oh-my-zsh/custom/plugins"
+mkdir -p "$ZSH_CUSTOM_PLUGINS"
+
+git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM_PLUGINS/zsh-autosuggestions" || true
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM_PLUGINS/zsh-syntax-highlighting" || true
+
 
 # 5️⃣ Install Pywal & Pywalfox
 echo "🐍 Installing Pywal and Pywalfox..."
@@ -80,7 +83,26 @@ chmod +x ~/.config/i3/clipboard_fix.sh
 # 8️⃣ Final Touches
 i3-msg reload || true
 
-echo "✅ DONE! REBOOT and then:"
+# 9️⃣ Configure Zsh History & Enable Plugins
+echo "📝 Finalizing Zsh Configuration..."
+# Ensure the history file exists and has correct permissions
+touch ~/.zsh_history
+
+# Update .zshrc with history settings and enable plugins
+sed -i 's/plugins=(git)/plugins=(git zsh-autosuggestions zsh-syntax-highlighting)/' ~/.zshrc
+
+cat << 'EOF' >> ~/.zshrc
+
+# --- Added by Install Script ---
+# History Configuration
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt share_history
+setopt append_history
+# -------------------------------
+EOF
+
 echo "1. Select i3 at login."
 echo "2. Run lxappearance to set Arc-Dark icons/theme."
 echo "3. Run 'py-on' to set your first dynamic theme!"
