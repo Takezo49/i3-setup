@@ -108,6 +108,24 @@ EOD
 
 chmod +x "$HOME/bin/enable_pywal.sh" "$HOME/bin/disable_pywal.sh"
 
+# Create Virtual Screen Toggle Script
+cat << 'EOT' > "$HOME/bin/monitor_toggle.sh"
+#!/bin/bash
+# Check if HDMI-1-1 is currently active (has a resolution assigned)
+if xrandr | grep "HDMI-1-1 connected" | grep -q "[0-9]x[0-9]"; then
+    xrandr --output HDMI-1-1 --off
+    notify-send "Virtual Monitor" "HDMI-1-1 Disabled"
+else
+    # Re-run the setup commands
+    xrandr --newmode "1360x768_60.00" 84.75 1360 1432 1568 1776 768 771 781 798 -HSync +VSync 2>/dev/null || true
+    xrandr --addmode HDMI-1-1 "1360x768_60.00" 2>/dev/null || true
+    xrandr --output HDMI-1-1 --mode "1360x768_60.00" --left-of eDP-1
+    notify-send "Virtual Monitor" "HDMI-1-1 Enabled (1360x768)"
+fi
+EOT
+
+chmod +x "$HOME/bin/monitor_toggle.sh"
+
 # 8️⃣ System Permissions (Thunar/Mounting Fix)
 echo "🛡️ Setting up system permissions..."
 sudo mkdir -p /etc/polkit-1/rules.d/
@@ -134,6 +152,11 @@ chmod +w ~/.zshrc
 
 # Update .zshrc plugins
 sed -i 's/plugins=(git)/plugins=(git zsh-autosuggestions zsh-syntax-highlighting)/' ~/.zshrc
+
+# --- NEW: Add Monitor Toggle Alias ---
+if ! grep -q "alias vmon" ~/.zshrc; then
+    echo "alias vmon='~/bin/monitor_toggle.sh'" >> ~/.zshrc
+fi
 
 # Append history settings if they don't exist
 if ! grep -q "HISTFILE" ~/.zshrc; then
@@ -165,7 +188,30 @@ fi
 echo "🔄 Reloading i3..."
 i3-msg reload || true
 
+# 9.1️⃣ Setup Virtual Monitor for Deskreen (1360x768)
+echo "🖥️ Configuring Virtual HDMI Monitor..."
+
+# A. Force HDMI-A-1 to 'Enabled' in GRUB if not already there
+if ! grep -q "video=HDMI-A-1:e" /etc/default/grub; then
+    echo "Adding video=HDMI-A-1:e to /etc/default/grub..."
+    sudo sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="/GRUB_CMDLINE_LINUX_DEFAULT="video=HDMI-A-1:e /g' /etc/default/grub
+    sudo update-grub
+    echo "⚠️ GRUB updated. You MUST reboot for the virtual port to appear."
+fi
+
+# B. Add the xrandr commands to i3 config to set resolution and position
+# We use a heredoc to ensure the commands are clean
+cat << 'EOF' >> ~/.config/i3/config
+
+# --- Virtual Monitor Setup (Deskreen) ---
+exec_always --no-startup-id xrandr --newmode "1360x768_60.00" 84.75 1360 1432 1568 1776 768 771 781 798 -HSync +VSync
+exec_always --no-startup-id xrandr --addmode HDMI-1-1 "1360x768_60.00"
+exec_always --no-startup-id xrandr --output HDMI-1-1 --mode "1360x768_60.00" --left-of eDP-1
+# ----------------------------------------
+EOF
+
 echo "✅ DONE! REBOOT and then:"
 echo "1. Select i3 at login."
 echo "2. Run lxappearance to set Arc-Dark icons/theme."
 echo "3. Run 'py-on' to set your first dynamic theme!"
+source ~/.zshrc || true
