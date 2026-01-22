@@ -113,6 +113,20 @@ EOF
 
     # 🔗 Update Firefox
     python3 -m pywalfox update
+cat <<EOF > ~/.config/sublime-text/Packages/User/Adaptive.sublime-theme
+[
+    {
+        "variables": {
+            "--background": "$BG",
+            "--bluish": "$C4",
+            "--redish": "$C1"
+        }
+    }
+]
+EOF
+
+    # 🔄 Reload i3 to apply transparency and bar colors
+    i3-msg reload
     echo "✔ Pywal Enabled! Wallpaper, Alacritty, and Sublime synced."
 else
     echo "✘ Error: File not found!"
