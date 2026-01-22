@@ -7,7 +7,7 @@ echo "🚀 Starting Full i3-Gaps & Pywal Setup..."
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y wget curl git thunar arandr flameshot arc-theme feh i3blocks \
     i3status i3 lxappearance python3-pip rofi unclutter cargo picom \
-    papirus-icon-theme imagemagick unzip zsh lxpolkit ntfs-3g udisks2
+    papirus-icon-theme imagemagick unzip zsh lxpolkit ntfs-3g udisks2 jq
 
 # Install Build Dependencies for i3-gaps (if needed)
 sudo apt install -y libxcb-shape0-dev libxcb-keysyms1-dev libpango1.0-dev \
@@ -72,6 +72,9 @@ sed -i '1iimport:\n  - ~/.config/alacritty/colors-wal.yml' ~/.config/alacritty/a
 # --------------------------------
 
 sudo chown -R $USER:$USER ~/.config ~/.zshrc ~/bin
+mkdir -p ~/.config/sublime-text/Packages/User/
+
+
 
 # 7️⃣ Create Pywal Toggle Scripts
 cat << 'EON' > "$HOME/bin/enable_pywal.sh"
@@ -80,16 +83,42 @@ read -p "Enter wallpaper path: " img_path
 if [ -f "$img_path" ]; then
     feh --bg-fill "$img_path"
     wal -i "$img_path" -n
-    
-    # Switch link to Pywal Cache
+
+    # 🔗 Update Alacritty link
     ln -sf ~/.cache/wal/colors-alacritty.yml ~/.config/alacritty/colors-wal.yml
-    
+
+    # 🎨 NEW: Build Sublime Text Color Scheme (Fixes broken link)
+    BG=$(jq -r '.special.background' ~/.cache/wal/colors.json)
+    FG=$(jq -r '.special.foreground' ~/.cache/wal/colors.json)
+    C1=$(jq -r '.colors.color1' ~/.cache/wal/colors.json)
+    C2=$(jq -r '.colors.color2' ~/.cache/wal/colors.json)
+    C3=$(jq -r '.colors.color3' ~/.cache/wal/colors.json)
+    C4=$(jq -r '.colors.color4' ~/.cache/wal/colors.json)
+
+    cat <<EOF > ~/.config/sublime-text/Packages/User/pywal.sublime-color-scheme
+{
+    "variables": { "background": "$BG", "foreground": "$FG", "color1": "$C1", "color2": "$C2", "color3": "$C3", "color4": "$C4" },
+    "globals": {
+        "background": "var(background)", "foreground": "var(foreground)", "caret": "var(foreground)",
+        "line_highlight": "var(background)", "selection": "var(color1)44"
+    },
+    "rules": [
+        { "scope": "keyword", "foreground": "var(color1)" },
+        { "scope": "string", "foreground": "var(color2)" },
+        { "scope": "constant.numeric", "foreground": "var(color3)" },
+        { "scope": "entity.name.function", "foreground": "var(color4)" }
+    ]
+}
+EOF
+
+    # 🔗 Update Firefox
     python3 -m pywalfox update
-    echo "✔ Pywal Enabled! (Colors linked to Cache)"
+    echo "✔ Pywal Enabled! Wallpaper, Alacritty, and Sublime synced."
 else
     echo "✘ Error: File not found!"
 fi
 EON
+
 
 cat << 'EOD' > "$HOME/bin/disable_pywal.sh"
 #!/bin/bash
