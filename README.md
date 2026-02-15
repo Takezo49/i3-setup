@@ -14,6 +14,12 @@ Every color across your entire desktop adapts to your wallpaper — automaticall
 
 ---
 
+## Preview
+
+![Clean Desktop](screenshots/example-full-screen.png)
+
+---
+
 ## What's Inside
 
 | Component | Purpose |
@@ -36,6 +42,8 @@ Every color across your entire desktop adapts to your wallpaper — automaticall
 - **Random wallpaper picker** — press a key and get a new look instantly
 - **Transparent i3bar** — with pywal-synced workspace colors
 - **i3blocks with pywal colors** — each block gets its own accent color from your wallpaper
+
+![Tiled Layout with Transparent Firefox](screenshots/transperent%20-firefox-layout.png)
 - **Tap-to-click touchpad** — configured out of the box
 - **Volume/Brightness keys** — Fn keys just work
 - **NTFS auto-mount** — access Windows drives from Thunar without issues
@@ -139,6 +147,12 @@ Run these in your terminal:
 
 ---
 
+## Terminal + System Info
+
+![Fastfetch](screenshots/fastfetch.png)
+
+---
+
 ## How Theming Works
 
 ```
@@ -181,6 +195,10 @@ i3-setup/
 │       └── config.rasi         # Rofi theme
 ├── .wallpapers/
 │   └── 23.jpg                  # Default wallpaper
+├── screenshots/
+│   ├── example-full-screen.png # Clean desktop preview
+│   ├── fastfetch.png           # Terminal with system info
+│   └── transperent -firefox-layout.png # Tiled layout with Firefox
 ├── .zshrc                      # Zsh config with plugins
 ├── install.sh                  # One-command setup script
 └── README.md
