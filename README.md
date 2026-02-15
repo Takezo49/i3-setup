@@ -54,12 +54,25 @@ Every color across your entire desktop adapts to your wallpaper — automaticall
 
 > **Note:** Do **not** run as root. The script uses `sudo` where needed.
 
-### Prerequisites
+### Step 1 — Install i3
 
-- Kali Linux / Debian-based distro
-- i3 installed and selected as your window manager (logout and login into i3 session)
+```bash
+sudo apt update
+sudo apt install i3
+```
 
-### Install
+### Step 2 — Switch to i3
+
+1. Log out of your current session
+2. On the login screen, click the **session/gear icon** (bottom-right or top-right depending on your display manager)
+3. Select **i3** from the list
+4. Log back in
+
+> You'll see a default i3 setup — that's expected. The install script will configure everything.
+
+### Step 3 — Run the Install Script
+
+Open a terminal (`Super + Return`) and run:
 
 ```bash
 git clone https://github.com/Takezo49/i3-setup.git
@@ -68,7 +81,13 @@ chmod +x install.sh
 ./install.sh
 ```
 
-Reboot when done.
+### Step 4 — Reboot
+
+```bash
+sudo reboot
+```
+
+After rebooting, your fully themed i3 desktop will be ready.
 
 ---
 
