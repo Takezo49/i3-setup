@@ -31,7 +31,10 @@ Every color across your entire desktop adapts to your wallpaper — automaticall
 | **Alacritty** | GPU-accelerated terminal — colors synced to wallpaper |
 | **Rofi** | Application launcher |
 | **Pywalfox** | Firefox colors synced to wallpaper |
+| **Sublime Text** | Editor with pywal-synced color scheme |
 | **Oh My Zsh** | Zsh with autosuggestions and syntax highlighting |
+
+![Sublime Text + Terminal — Colors Synced to Wallpaper](screenshots/subl-sync-colours.png)
 
 ---
 
