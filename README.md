@@ -172,12 +172,6 @@ Run these in your terminal:
 
 ---
 
-## Sublime Text — Pywal Color Sync
-
-![Sublime Text with Pywal Colors](screenshots/subl-colour-sync.png)
-
----
-
 ## How Theming Works
 
 ```
