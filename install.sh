@@ -35,6 +35,24 @@ echo "Installing Alacritty..."
 wget -nc https://github.com/barnumbirr/alacritty-debian/releases/download/v0.10.0-rc4-1/alacritty_0.10.0-rc4-1_amd64_bullseye.deb || true
 sudo dpkg -i alacritty_0.10.0-rc4-1_amd64_bullseye.deb || sudo apt install -f -y
 
+# 3.1. Install Sublime Text
+echo "Installing Sublime Text..."
+if ! command -v subl &> /dev/null; then
+    wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/sublimehq-archive.gpg > /dev/null
+    echo "deb https://download.sublimetext.com/ apt/stable/" | sudo tee /etc/apt/sources.list.d/sublime-text.list
+    sudo apt update
+    sudo apt install -y sublime-text
+fi
+
+# 3.2. Configure Sublime Text to use Pywal color scheme
+mkdir -p ~/.config/sublime-text/Packages/User/
+cat <<'EOF' > ~/.config/sublime-text/Packages/User/Preferences.sublime-settings
+{
+    "color_scheme": "Packages/User/pywal.sublime-color-scheme",
+    "theme": "Default Dark.sublime-theme"
+}
+EOF
+
 # 4. Install Oh My Zsh (Unattended)
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
     echo "Installing Oh My Zsh..."
@@ -56,7 +74,6 @@ python3 -m pywalfox install
 # 6. Sync Configs & Fix Permissions
 echo "Syncing Config Files..."
 mkdir -p ~/.config/i3 ~/.config/picom ~/.config/rofi ~/.config/alacritty ~/bin
-mkdir -p ~/.config/sublime-text/Packages/User/
 mkdir -p ~/.config/wal/templates
 
 # Copy everything from repo to .config
